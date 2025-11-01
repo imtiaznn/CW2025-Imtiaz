@@ -1,6 +1,12 @@
 package com.comp2042;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+
 public class GameController implements InputEventListener {
+
+    private Timeline timeline;
 
     private Board board = new SimpleBoard(25, 10);
 
@@ -11,7 +17,19 @@ public class GameController implements InputEventListener {
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
+        
+        timeline = new Timeline(new KeyFrame(
+            Duration.millis(400),
+            ae -> update()
+        ));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+        
         viewGuiController.bindScore(board.getScore().scoreProperty());
+    }
+
+    public void update() {
+        viewGuiController.moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD));
     }
 
     @Override
@@ -36,6 +54,16 @@ public class GameController implements InputEventListener {
             }
         }
         return new DownData(clearRow, board.getViewData());
+    }
+
+    @Override
+    public void startGame() {
+        if (timeline != null) timeline.play();
+    }
+
+    @Override
+    public void stopGame() {
+        if (timeline != null) timeline.stop();
     }
 
     @Override
